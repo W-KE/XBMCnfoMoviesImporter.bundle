@@ -203,30 +203,49 @@ class XBMCNFO(PlexAgent):
                         nfo=nfo_file))
                     pass
                 # Year
-                try:
-                    media.year = int(nfo_xml.xpath('year')[0].text.strip())
-                    log.debug('Reading year tag: {year}'.format(
-                        year=media.year))
-                except:
-                    pass
+                {
+                    year = None
+                    try:
+                        media.year = int(nfo_xml.xpath('season')[0].text.strip())
+                        log.debug('Reading year tag: {year}'.format(
+                            year=media.year))
+                    except:
+                        pass
+                    if not year:
+                        try:
+                            media.year = int(nfo_xml.xpath('year')[0].text.strip())
+                            log.debug('Reading year tag: {year}'.format(
+                                year=media.year))
+                        except:
+                            pass
+                }
                 # ID
-                try:
-                    id = nfo_xml.xpath('id')[0].text.strip()
-                except:
-                    id = ''
-                    pass
-                if len(id) > 2:
-                        media.id = id
+                {
+                    video_id = None
+                    try:
+                        video_id = nfo_xml.xpath('uniqueid')[0].text.strip()
+                    except:
+                        video_id = ''
+                        pass
+                    if not video_id:
+                        try:
+                            video_id = nfo_xml.xpath('id')[0].text.strip()
+                        except:
+                            video_id = ''
+                            pass
+                    if len(video_id) > 2:
+                        media.id = video_id
                         log.debug('ID from nfo: {id}'.format(id=media.id))
-                else:
-                    # if movie id doesn't exist, create
-                    # one based on hash of title and year
-                    def ord3(x):
-                        return '%.3d' % ord(x)
-                    id = int(''.join(map(ord3, media.name+str(media.year))))
-                    id = str(abs(hash(int(id))))
-                    media.id = id
-                    log.debug('ID generated: {id}'.format(id=media.id))
+                    else:
+                        # if movie id doesn't exist, create
+                        # one based on hash of title and year
+                        def ord3(x):
+                            return '%.3d' % ord(x)
+                        video_id = int(''.join(map(ord3, media.name+str(media.year))))
+                        video_id = str(abs(hash(int(id))))
+                        media.id = video_id
+                        log.debug('ID generated: {id}'.format(id=media.id))
+                }
 
                 results.Append(Metadata(id=media.id, name=media.name, year=media.year, lang=lang, score=100))
                 try:
@@ -417,12 +436,23 @@ class XBMCNFO(PlexAgent):
                         nfo=nfo_file))
                     pass
                 # Year
-                try:
-                    metadata.year = int(nfo_xml.xpath('year')[0].text.strip())
-                    log.debug('Set year tag: {year}'.format(
-                        year=metadata.year))
-                except:
-                    pass
+                {
+                    year = None
+                    try:
+                        year = int(nfo_xml.xpath('season')[0].text.strip())
+                        metadata.year = year
+                        log.debug('Set year tag: {year}'.format(
+                            year=metadata.year))
+                    except:
+                        pass
+                    if not year:
+                        try:
+                            metadata.year = int(nfo_xml.xpath('year')[0].text.strip())
+                            log.debug('Set year tag: {year}'.format(
+                                year=metadata.year))
+                        except:
+                            pass
+                }
                 # Original Title
                 try:
                     metadata.original_title = nfo_xml.xpath('originaltitle')[0].text.strip()
@@ -482,21 +512,38 @@ class XBMCNFO(PlexAgent):
                     )
 
                 # Studio
-                try:
-                    metadata.studio = nfo_xml.xpath('studio')[0].text.strip()
-                except:
-                    pass
+                {
+                    studio = None
+                    try:
+                        studio = nfo_xml.xpath('showtitle')[0].text.strip()
+                        metadata.studio = studio
+                    except:
+                        pass
+                    if not studio:
+                        try:
+                            metadata.studio = nfo_xml.xpath('studio')[0].text.strip()
+                        except:
+                            pass
+                }
                 # Premiere
                 release_string = None
                 release_date = None
                 try:
                     try:
-                        log.debug('Reading releasedate tag...')
-                        release_string = nfo_xml.xpath('releasedate')[0].text.strip()
-                        log.debug('Releasedate tag is: {value}'.format(value=release_string))
+                        log.debug('Reading aired tag...')
+                        release_string = nfo_xml.xpath('aired')[0].text.strip()
+                        log.debug('Aired tag is: {value}'.format(value=release_string))
                     except:
-                        log.debug('No releasedate tag found...')
+                        log.debug('No aired tag found...')
                         pass
+                    if not release_string:
+                        try:
+                            log.debug('Reading releasedate tag...')
+                            release_string = nfo_xml.xpath('releasedate')[0].text.strip()
+                            log.debug('Releasedate tag is: {value}'.format(value=release_string))
+                        except:
+                            log.debug('No releasedate tag found...')
+                            pass
                     if not release_string:
                         try:
                             log.debug('Reading premiered tag...')
